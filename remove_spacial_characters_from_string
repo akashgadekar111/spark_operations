@@ -1,0 +1,32 @@
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import *
+from pyspark.sql.types import *
+
+spark = SparkSession.builder.appName("special_char_removing_demo").getOrCreate()
+
+data = [(1,"#Corrola","Toyota",1800),
+         (2,"City@","Honda",1500),
+         (3,"Vitz","Toyota",1300),
+         (4,"Baleno","Suzuki",1500),
+         (5,"Mus$tan)g","Ford",5000),
+         (6,"[[Prius","Toyota",3200)]
+
+schema = ["id","car_name","company","power"]
+df_with_spec_char = spark.createDataFrame(data=data,schema=schema)
+df_with_spec_char.show()
+
+df_clean = df_with_spec_char.select("id",regexp_replace("car_name","[^0-9a-zA-Z_\-]+","").alias("clean_car_name"),"company","power")
+df_clean.show(truncate=False)
+
+'''Result
++---+--------------+-------+-----+
+|id |clean_car_name|company|power|
++---+--------------+-------+-----+
+|1  |Corrola       |Toyota |1800 |
+|2  |City          |Honda  |1500 |
+|3  |Vitz          |Toyota |1300 |
+|4  |Baleno        |Suzuki |1500 |
+|5  |Mustang       |Ford   |5000 |
+|6  |Prius         |Toyota |3200 |
++---+--------------+-------+-----+
+'''
