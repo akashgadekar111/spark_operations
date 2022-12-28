@@ -1,0 +1,49 @@
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import *
+from pyspark.sql.types import *
+
+spark = SparkSession.builder.appName("salary_increment_column").getOrCreate()
+
+data = [("James", "Sales", 3000),
+    ("Michael", "Marketing", 4600),
+    ("Robert", "Sales", 4100),
+    ("Maria", "Finance", 3000),
+    ("James", "Sales", 3000),
+    ("Scott", "Finance", 3300)]
+
+columns = StructType([ \
+    StructField("Name",StringType(),True),\
+    StructField("Department",StringType(),True),\
+    StructField("Salary",IntegerType(),True)
+])
+
+emp_df = spark.createDataFrame(data=data, schema=columns)
+emp_df.show(truncate=False)
+
+#salary increment
+emp_df.withColumn("Increased_Salary",col("Salary")+col("Salary")*0.3).show()
+
+'''Input_data
++-------+----------+------+
+|Name   |Department|Salary|
++-------+----------+------+
+|James  |Sales     |3000  |
+|Michael|Marketing |4600  |
+|Robert |Sales     |4100  |
+|Maria  |Finance   |3000  |
+|James  |Sales     |3000  |
+|Scott  |Finance   |3300  |
++-------+----------+------+
+
+Result with 30% salary increment
++-------+----------+------+----------------+
+|   Name|Department|Salary|Increased_Salary|
++-------+----------+------+----------------+
+|  James|     Sales|  3000|          3900.0|
+|Michael| Marketing|  4600|          5980.0|
+| Robert|     Sales|  4100|          5330.0|
+|  Maria|   Finance|  3000|          3900.0|
+|  James|     Sales|  3000|          3900.0|
+|  Scott|   Finance|  3300|          4290.0|
++-------+----------+------+----------------+
+'''
